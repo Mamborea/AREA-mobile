@@ -1,17 +1,21 @@
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { useAuth } from '../context/AuthContext'
+import { useAppSelector, useAppDispatch, logout } from '../shared/src/native'
 import type { RootStackParamList } from '../navigation'
 
-type DashboardNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Dashboard'>
+type DashboardNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'Dashboard'
+>
 
 export function Dashboard() {
-  const { user, logout } = useAuth()
+  const { user } = useAppSelector((state) => state.auth)
+  const dispatch = useAppDispatch()
   const navigation = useNavigation<DashboardNavigationProp>()
 
-  const handleLogout = async () => {
-    await logout()
+  const handleLogout = () => {
+    dispatch(logout())
     navigation.reset({
       index: 0,
       routes: [{ name: 'Login' }],

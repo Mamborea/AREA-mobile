@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   View,
   Text,
@@ -8,49 +8,42 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native'
-import { githubApi } from '../api'
-import type { Repository, Webhook, CreateWebhookDto } from '../types'
+import {
+  useListRepositoriesQuery,
+  useListWebhooksQuery,
+  useCreateWebhookMutation,
+} from '../shared/src/native'
+import type { Repository, CreateWebhookDto } from '../shared/src'
 
 export function GitHub() {
-  const [repositories, setRepositories] = useState<Repository[]>([])
   const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null)
-  const [webhooks, setWebhooks] = useState<Webhook[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState('')
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [webhookUrl, setWebhookUrl] = useState('')
   const [webhookEvents, setWebhookEvents] = useState<string[]>(['push'])
   const [webhookSecret, setWebhookSecret] = useState('')
 
-  useEffect(() => {
-    loadRepositories()
-  }, [])
+  const {
+    data: repositories = [],
+    isLoading: isLoadingRepos,
+    error: reposError,
+  } = useListRepositoriesQuery()
 
-  const loadRepositories = async () => {
-    try {
-      setIsLoading(true)
-      const repos = await githubApi.listRepositories()
-      setRepositories(Array.isArray(repos) ? repos : [])
-    } catch (err) {
-      setError('Failed to load repositories. Make sure your GitHub account is linked.')
-    } finally {
-      setIsLoading(false)
+  const { data: webhooks = [] } = useListWebhooksQuery(
+    {
+      owner: selectedRepo?.owner.login || '',
+      repo: selectedRepo?.name || '',
+    },
+    {
+      skip: !selectedRepo,
     }
-  }
+  )
 
-  const loadWebhooks = async (owner: string, repo: string) => {
-    try {
-      const hooks = await githubApi.listWebhooks(owner, repo)
-      setWebhooks(hooks)
-    } catch (err) {
-      setWebhooks([])
-    }
-  }
+  const [createWebhook, { isLoading: isCreatingWebhook }] =
+    useCreateWebhookMutation()
 
-  const handleSelectRepo = async (repo: Repository) => {
+  const handleSelectRepo = (repo: Repository) => {
     setSelectedRepo(repo)
     setShowCreateForm(false)
-    await loadWebhooks(repo.owner.login, repo.name)
   }
 
   const handleCreateWebhook = async () => {
@@ -64,18 +57,24 @@ export function GitHub() {
         events: webhookEvents,
         secret: webhookSecret || undefined,
       }
-      await githubApi.createWebhook(dto)
-      await loadWebhooks(selectedRepo.owner.login, selectedRepo.name)
+      await createWebhook(dto).unwrap()
       setShowCreateForm(false)
       setWebhookUrl('')
       setWebhookSecret('')
       setWebhookEvents(['push'])
     } catch (err) {
-      setError('Failed to create webhook')
+      console.error('Failed to create webhook:', err)
     }
   }
 
-  const availableEvents = ['push', 'pull_request', 'issues', 'create', 'delete', 'release']
+  const availableEvents = [
+    'push',
+    'pull_request',
+    'issues',
+    'create',
+    'delete',
+    'release',
+  ]
 
   const toggleEvent = (event: string) => {
     setWebhookEvents((prev) =>
@@ -83,7 +82,7 @@ export function GitHub() {
     )
   }
 
-  if (isLoading) {
+  if (isLoadingRepos) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#e94560" />
@@ -92,12 +91,14 @@ export function GitHub() {
     )
   }
 
-  if (error && repositories.length === 0) {
+  if (reposError) {
     return (
       <View style={styles.container}>
         <Text style={styles.title}>GitHub Integration</Text>
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
+          <Text style={styles.errorText}>
+            Failed to load repositories. Make sure your GitHub account is linked.
+          </Text>
           <Text style={styles.errorHint}>
             Please link your GitHub account from your profile page.
           </Text>
@@ -192,7 +193,8 @@ export function GitHub() {
                       <Text
                         style={[
                           styles.eventChipText,
-                          webhookEvents.includes(event) && styles.eventChipTextSelected,
+                          webhookEvents.includes(event) &&
+                            styles.eventChipTextSelected,
                         ]}
                       >
                         {event}
@@ -203,10 +205,18 @@ export function GitHub() {
               </View>
 
               <TouchableOpacity
-                style={styles.submitButton}
+                style={[
+                  styles.submitButton,
+                  isCreatingWebhook && styles.buttonDisabled,
+                ]}
                 onPress={handleCreateWebhook}
+                disabled={isCreatingWebhook}
               >
-                <Text style={styles.submitButtonText}>Create</Text>
+                {isCreatingWebhook ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.submitButtonText}>Create</Text>
+                )}
               </TouchableOpacity>
             </View>
           )}
@@ -224,7 +234,9 @@ export function GitHub() {
                     <View
                       style={[
                         styles.statusBadge,
-                        webhook.active ? styles.statusActive : styles.statusInactive,
+                        webhook.active
+                          ? styles.statusActive
+                          : styles.statusInactive,
                       ]}
                     >
                       <Text style={styles.statusText}>
@@ -397,6 +409,9 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 8,
     alignItems: 'center',
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   submitButtonText: {
     color: '#fff',

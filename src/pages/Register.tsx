@@ -13,45 +13,46 @@ import {
 } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { useAuth } from '../context/AuthContext'
+import { useRegisterMutation } from '../shared/src/native'
 import type { RootStackParamList } from '../navigation'
 
-type RegisterNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Register'>
+type RegisterNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'Register'
+>
 
 export function Register() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const { register } = useAuth()
+  const [errorMessage, setErrorMessage] = useState('')
   const navigation = useNavigation<RegisterNavigationProp>()
+
+  const [register, { isLoading }] = useRegisterMutation()
 
   const handleSubmit = async () => {
     if (!name || !email || !password || !confirmPassword) {
-      setError('Please fill in all fields')
+      setErrorMessage('Please fill in all fields')
       return
     }
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match')
+      setErrorMessage('Passwords do not match')
       return
     }
 
-    setError('')
-    setIsLoading(true)
+    setErrorMessage('')
 
     try {
-      await register(email, password, name)
+      await register({ email, password, name }).unwrap()
       Alert.alert('Success', 'Registration successful! Please login.', [
         { text: 'OK', onPress: () => navigation.navigate('Login') },
       ])
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Registration failed'
-      setError(errorMessage)
-    } finally {
-      setIsLoading(false)
+    } catch (err: any) {
+      const message = err.data?.message || 'An unexpected error occurred.'
+      setErrorMessage(message)
+      console.error('Failed to register:', err)
     }
   }
 
@@ -64,7 +65,7 @@ export function Register() {
         <View style={styles.card}>
           <Text style={styles.title}>Register</Text>
 
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
           <View style={styles.formGroup}>
             <Text style={styles.label}>Name</Text>

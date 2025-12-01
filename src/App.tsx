@@ -2,14 +2,19 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
-import { AuthProvider, useAuth } from './context/AuthContext'
+import { Provider } from 'react-redux'
+import { store, useAppSelector, useGetProfileQuery } from './shared/src/native'
 import { Login, Register, Dashboard, Profile, GitHub } from './pages'
 import type { RootStackParamList } from './navigation'
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
 
 function AppNavigator() {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated, token } = useAppSelector((state) => state.auth)
+
+  const { isLoading } = useGetProfileQuery(undefined, {
+    skip: !token,
+  })
 
   if (isLoading) {
     return (
@@ -72,13 +77,13 @@ function AppNavigator() {
 
 function App() {
   return (
-    <SafeAreaProvider>
-      <AuthProvider>
+    <Provider store={store}>
+      <SafeAreaProvider>
         <NavigationContainer>
           <AppNavigator />
         </NavigationContainer>
-      </AuthProvider>
-    </SafeAreaProvider>
+      </SafeAreaProvider>
+    </Provider>
   )
 }
 

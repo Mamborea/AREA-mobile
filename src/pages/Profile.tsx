@@ -1,20 +1,22 @@
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Linking, Alert } from 'react-native'
-import { useAuth } from '../context/AuthContext'
-import { authApi } from '../api'
+import { useAppSelector, useGetGithubAuthUrlQuery } from '../shared/src/native'
 
 export function Profile() {
-  const { user } = useAuth()
+  const { user } = useAppSelector((state) => state.auth)
+  const { data, refetch } = useGetGithubAuthUrlQuery()
 
   const handleLinkGithub = async () => {
-    try {
-      const url = await authApi.getGithubAuthUrl()
+    const result = await refetch()
+    const url = result.data?.url
+
+    if (url) {
       const canOpen = await Linking.canOpenURL(url)
       if (canOpen) {
         await Linking.openURL(url)
       } else {
         Alert.alert('Error', 'Cannot open GitHub authentication URL')
       }
-    } catch (error) {
+    } else {
       Alert.alert('Error', 'Failed to get GitHub authentication URL')
     }
   }
