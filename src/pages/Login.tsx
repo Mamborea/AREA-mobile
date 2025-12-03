@@ -1,46 +1,50 @@
-import { useState } from 'react'
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-} from 'react-native'
-import { useNavigation } from '@react-navigation/native'
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { useLoginMutation } from '../shared/src/native'
-import type { RootStackParamList } from '../navigation'
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import type { RootStackParamList } from '../navigation';
+import { useLoginMutation } from '../shared/src/native';
 
-type LoginNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>
+type LoginNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'Login'
+>;
 
 export function Login() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
-  const navigation = useNavigation<LoginNavigationProp>()
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const navigation = useNavigation<LoginNavigationProp>();
 
-  const [login, { isLoading }] = useLoginMutation()
+  const [login, { isLoading }] = useLoginMutation();
 
   const handleSubmit = async () => {
-    if (!email || !password) return
-    setErrorMessage('')
+    if (!email || !password) return;
+    setErrorMessage('');
 
     try {
-      await login({ email, password }).unwrap()
+      await login({ email, password }).unwrap();
       navigation.reset({
         index: 0,
         routes: [{ name: 'Dashboard' }],
-      })
-    } catch (err: any) {
-      const message = err.data?.message || 'An unexpected error occurred.'
-      setErrorMessage(message)
-      console.error('Failed to login:', err)
+      });
+    } catch (err) {
+      const apiError = err as { data?: { message: string } };
+      const message = apiError.data?.message || 'An unexpected error occurred.';
+      setErrorMessage(message);
+      console.error('Failed to login:', err);
     }
-  }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -51,7 +55,9 @@ export function Login() {
         <View style={styles.card}>
           <Text style={styles.title}>Login</Text>
 
-          {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+          {errorMessage ? (
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          ) : null}
 
           <View style={styles.formGroup}>
             <Text style={styles.label}>Email</Text>
@@ -59,11 +65,11 @@ export function Login() {
               style={styles.input}
               value={email}
               onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
+              keyboardType='email-address'
+              autoCapitalize='none'
               autoCorrect={false}
-              placeholder="Enter your email"
-              placeholderTextColor="#888"
+              placeholder='Enter your email'
+              placeholderTextColor='#888'
             />
           </View>
 
@@ -74,8 +80,8 @@ export function Login() {
               value={password}
               onChangeText={setPassword}
               secureTextEntry
-              placeholder="Enter your password"
-              placeholderTextColor="#888"
+              placeholder='Enter your password'
+              placeholderTextColor='#888'
             />
           </View>
 
@@ -85,7 +91,7 @@ export function Login() {
             disabled={isLoading}
           >
             {isLoading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color='#fff' />
             ) : (
               <Text style={styles.buttonText}>Login</Text>
             )}
@@ -100,7 +106,7 @@ export function Login() {
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -183,4 +189,4 @@ const styles = StyleSheet.create({
     color: '#e94560',
     fontWeight: '500',
   },
-})
+});

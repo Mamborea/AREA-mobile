@@ -1,26 +1,32 @@
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { useAppSelector, useAppDispatch, logout } from '../shared/src/native'
-import type { RootStackParamList } from '../navigation'
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import type { RootStackParamList } from '../navigation';
+import { logout, useAppDispatch, useAppSelector } from '../shared/src/native';
 
 type DashboardNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'Dashboard'
->
+>;
 
 export function Dashboard() {
-  const { user } = useAppSelector((state) => state.auth)
-  const dispatch = useAppDispatch()
-  const navigation = useNavigation<DashboardNavigationProp>()
+  const { user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+  const navigation = useNavigation<DashboardNavigationProp>();
 
   const handleLogout = () => {
-    dispatch(logout())
+    dispatch(logout());
     navigation.reset({
       index: 0,
       routes: [{ name: 'Login' }],
-    })
-  }
+    });
+  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -55,7 +61,7 @@ export function Dashboard() {
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
     </ScrollView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -122,4 +128,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-})
+});

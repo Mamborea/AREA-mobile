@@ -1,32 +1,32 @@
-import { useState } from 'react'
+import { useState } from 'react';
 import {
-  View,
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator,
-} from 'react-native'
+  View,
+} from 'react-native';
+import type { CreateWebhookDto, Repository } from '../shared/src';
 import {
+  useCreateWebhookMutation,
   useListRepositoriesQuery,
   useListWebhooksQuery,
-  useCreateWebhookMutation,
-} from '../shared/src/native'
-import type { Repository, CreateWebhookDto } from '../shared/src'
+} from '../shared/src/native';
 
 export function GitHub() {
-  const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null)
-  const [showCreateForm, setShowCreateForm] = useState(false)
-  const [webhookUrl, setWebhookUrl] = useState('')
-  const [webhookEvents, setWebhookEvents] = useState<string[]>(['push'])
-  const [webhookSecret, setWebhookSecret] = useState('')
+  const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [webhookUrl, setWebhookUrl] = useState('');
+  const [webhookEvents, setWebhookEvents] = useState<string[]>(['push']);
+  const [webhookSecret, setWebhookSecret] = useState('');
 
   const {
     data: repositories = [],
     isLoading: isLoadingRepos,
     error: reposError,
-  } = useListRepositoriesQuery()
+  } = useListRepositoriesQuery();
 
   const { data: webhooks = [] } = useListWebhooksQuery(
     {
@@ -36,18 +36,18 @@ export function GitHub() {
     {
       skip: !selectedRepo,
     }
-  )
+  );
 
   const [createWebhook, { isLoading: isCreatingWebhook }] =
-    useCreateWebhookMutation()
+    useCreateWebhookMutation();
 
   const handleSelectRepo = (repo: Repository) => {
-    setSelectedRepo(repo)
-    setShowCreateForm(false)
-  }
+    setSelectedRepo(repo);
+    setShowCreateForm(false);
+  };
 
   const handleCreateWebhook = async () => {
-    if (!selectedRepo || !webhookUrl) return
+    if (!selectedRepo || !webhookUrl) return;
 
     try {
       const dto: CreateWebhookDto = {
@@ -56,16 +56,16 @@ export function GitHub() {
         webhookUrl,
         events: webhookEvents,
         secret: webhookSecret || undefined,
-      }
-      await createWebhook(dto).unwrap()
-      setShowCreateForm(false)
-      setWebhookUrl('')
-      setWebhookSecret('')
-      setWebhookEvents(['push'])
+      };
+      await createWebhook(dto).unwrap();
+      setShowCreateForm(false);
+      setWebhookUrl('');
+      setWebhookSecret('');
+      setWebhookEvents(['push']);
     } catch (err) {
-      console.error('Failed to create webhook:', err)
+      console.error('Failed to create webhook:', err);
     }
-  }
+  };
 
   const availableEvents = [
     'push',
@@ -74,21 +74,21 @@ export function GitHub() {
     'create',
     'delete',
     'release',
-  ]
+  ];
 
   const toggleEvent = (event: string) => {
     setWebhookEvents((prev) =>
       prev.includes(event) ? prev.filter((e) => e !== event) : [...prev, event]
-    )
-  }
+    );
+  };
 
   if (isLoadingRepos) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#e94560" />
+        <ActivityIndicator size='large' color='#e94560' />
         <Text style={styles.loadingText}>Loading repositories...</Text>
       </View>
-    )
+    );
   }
 
   if (reposError) {
@@ -97,14 +97,15 @@ export function GitHub() {
         <Text style={styles.title}>GitHub Integration</Text>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>
-            Failed to load repositories. Make sure your GitHub account is linked.
+            Failed to load repositories. Make sure your GitHub account is
+            linked.
           </Text>
           <Text style={styles.errorHint}>
             Please link your GitHub account from your profile page.
           </Text>
         </View>
       </View>
-    )
+    );
   }
 
   return (
@@ -159,10 +160,10 @@ export function GitHub() {
                   style={styles.input}
                   value={webhookUrl}
                   onChangeText={setWebhookUrl}
-                  placeholder="https://example.com/webhook"
-                  placeholderTextColor="#888"
-                  autoCapitalize="none"
-                  keyboardType="url"
+                  placeholder='https://example.com/webhook'
+                  placeholderTextColor='#888'
+                  autoCapitalize='none'
+                  keyboardType='url'
                 />
               </View>
 
@@ -172,9 +173,9 @@ export function GitHub() {
                   style={styles.input}
                   value={webhookSecret}
                   onChangeText={setWebhookSecret}
-                  placeholder="Webhook secret"
-                  placeholderTextColor="#888"
-                  autoCapitalize="none"
+                  placeholder='Webhook secret'
+                  placeholderTextColor='#888'
+                  autoCapitalize='none'
                 />
               </View>
 
@@ -186,7 +187,8 @@ export function GitHub() {
                       key={event}
                       style={[
                         styles.eventChip,
-                        webhookEvents.includes(event) && styles.eventChipSelected,
+                        webhookEvents.includes(event) &&
+                          styles.eventChipSelected,
                       ]}
                       onPress={() => toggleEvent(event)}
                     >
@@ -213,7 +215,7 @@ export function GitHub() {
                 disabled={isCreatingWebhook}
               >
                 {isCreatingWebhook ? (
-                  <ActivityIndicator color="#fff" />
+                  <ActivityIndicator color='#fff' />
                 ) : (
                   <Text style={styles.submitButtonText}>Create</Text>
                 )}
@@ -258,7 +260,7 @@ export function GitHub() {
         </View>
       )}
     </ScrollView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -473,4 +475,4 @@ const styles = StyleSheet.create({
     color: '#888',
     fontSize: 12,
   },
-})
+});

@@ -1,25 +1,33 @@
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Linking, Alert } from 'react-native'
-import { useAppSelector, useGetGithubAuthUrlQuery } from '../shared/src/native'
+import {
+  Alert,
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { useAppSelector, useGetGithubAuthUrlQuery } from '../shared/src/native';
 
 export function Profile() {
-  const { user } = useAppSelector((state) => state.auth)
-  const { data, refetch } = useGetGithubAuthUrlQuery()
+  const { user } = useAppSelector((state) => state.auth);
+  const { refetch } = useGetGithubAuthUrlQuery();
 
   const handleLinkGithub = async () => {
-    const result = await refetch()
-    const url = result.data?.url
+    const result = await refetch();
+    const url = result.data?.url;
 
     if (url) {
-      const canOpen = await Linking.canOpenURL(url)
+      const canOpen = await Linking.canOpenURL(url);
       if (canOpen) {
-        await Linking.openURL(url)
+        await Linking.openURL(url);
       } else {
-        Alert.alert('Error', 'Cannot open GitHub authentication URL')
+        Alert.alert('Error', 'Cannot open GitHub authentication URL');
       }
     } else {
-      Alert.alert('Error', 'Failed to get GitHub authentication URL')
+      Alert.alert('Error', 'Failed to get GitHub authentication URL');
     }
-  }
+  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -43,13 +51,16 @@ export function Profile() {
 
         <View style={styles.actionsSection}>
           <Text style={styles.sectionTitle}>Connected Services</Text>
-          <TouchableOpacity style={styles.githubButton} onPress={handleLinkGithub}>
+          <TouchableOpacity
+            style={styles.githubButton}
+            onPress={handleLinkGithub}
+          >
             <Text style={styles.githubButtonText}>Link GitHub Account</Text>
           </TouchableOpacity>
         </View>
       </View>
     </ScrollView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -110,4 +121,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-})
+});

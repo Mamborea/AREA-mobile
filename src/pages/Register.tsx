@@ -1,60 +1,61 @@
-import { useState } from 'react'
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
-} from 'react-native'
-import { useNavigation } from '@react-navigation/native'
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { useRegisterMutation } from '../shared/src/native'
-import type { RootStackParamList } from '../navigation'
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import type { RootStackParamList } from '../navigation';
+import { useRegisterMutation } from '../shared/src/native';
 
 type RegisterNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'Register'
->
+>;
 
 export function Register() {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
-  const navigation = useNavigation<RegisterNavigationProp>()
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const navigation = useNavigation<RegisterNavigationProp>();
 
-  const [register, { isLoading }] = useRegisterMutation()
+  const [register, { isLoading }] = useRegisterMutation();
 
   const handleSubmit = async () => {
     if (!name || !email || !password || !confirmPassword) {
-      setErrorMessage('Please fill in all fields')
-      return
+      setErrorMessage('Please fill in all fields');
+      return;
     }
 
     if (password !== confirmPassword) {
-      setErrorMessage('Passwords do not match')
-      return
+      setErrorMessage('Passwords do not match');
+      return;
     }
 
-    setErrorMessage('')
+    setErrorMessage('');
 
     try {
-      await register({ email, password, name }).unwrap()
+      await register({ email, password, name }).unwrap();
       Alert.alert('Success', 'Registration successful! Please login.', [
         { text: 'OK', onPress: () => navigation.navigate('Login') },
-      ])
-    } catch (err: any) {
-      const message = err.data?.message || 'An unexpected error occurred.'
-      setErrorMessage(message)
-      console.error('Failed to register:', err)
+      ]);
+    } catch (err) {
+      const apiError = err as { data?: { message: string } };
+      const message = apiError.data?.message || 'An unexpected error occurred.';
+      setErrorMessage(message);
+      console.error('Failed to register:', err);
     }
-  }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -65,7 +66,9 @@ export function Register() {
         <View style={styles.card}>
           <Text style={styles.title}>Register</Text>
 
-          {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+          {errorMessage ? (
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          ) : null}
 
           <View style={styles.formGroup}>
             <Text style={styles.label}>Name</Text>
@@ -73,9 +76,9 @@ export function Register() {
               style={styles.input}
               value={name}
               onChangeText={setName}
-              autoCapitalize="words"
-              placeholder="Enter your name"
-              placeholderTextColor="#888"
+              autoCapitalize='words'
+              placeholder='Enter your name'
+              placeholderTextColor='#888'
             />
           </View>
 
@@ -85,11 +88,11 @@ export function Register() {
               style={styles.input}
               value={email}
               onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
+              keyboardType='email-address'
+              autoCapitalize='none'
               autoCorrect={false}
-              placeholder="Enter your email"
-              placeholderTextColor="#888"
+              placeholder='Enter your email'
+              placeholderTextColor='#888'
             />
           </View>
 
@@ -100,8 +103,8 @@ export function Register() {
               value={password}
               onChangeText={setPassword}
               secureTextEntry
-              placeholder="Enter your password"
-              placeholderTextColor="#888"
+              placeholder='Enter your password'
+              placeholderTextColor='#888'
             />
           </View>
 
@@ -112,8 +115,8 @@ export function Register() {
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry
-              placeholder="Confirm your password"
-              placeholderTextColor="#888"
+              placeholder='Confirm your password'
+              placeholderTextColor='#888'
             />
           </View>
 
@@ -123,7 +126,7 @@ export function Register() {
             disabled={isLoading}
           >
             {isLoading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color='#fff' />
             ) : (
               <Text style={styles.buttonText}>Register</Text>
             )}
@@ -138,7 +141,7 @@ export function Register() {
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -221,4 +224,4 @@ const styles = StyleSheet.create({
     color: '#e94560',
     fontWeight: '500',
   },
-})
+});
