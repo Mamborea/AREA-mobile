@@ -4,6 +4,7 @@ import type { RootState } from '../store';
 import type {
   ApiAuthResponse,
   CreateWebhookDto,
+  MicrosoftSubscription,
   Repository,
   User,
   Webhook,
@@ -11,7 +12,6 @@ import type {
 
 export const apiSlice = createApi({
   reducerPath: 'api',
-  // Allow both mobile and web to use the redux
   baseQuery: async (args, api, extraOptions) => {
     const baseUrl = (api.getState() as RootState).config.baseUrl;
     const rawBaseQuery = fetchBaseQuery({
@@ -26,8 +26,9 @@ export const apiSlice = createApi({
     });
     return rawBaseQuery(args, api, extraOptions);
   },
-  tagTypes: ['User', 'Repos', 'Webhooks'],
+  tagTypes: ['User', 'Repos', 'Webhooks', 'MicrosoftSubscriptions'],
   endpoints: (builder) => ({
+    // ... existing endpoints
     login: builder.mutation<
       ApiAuthResponse,
       { email: string; password: string }
@@ -57,9 +58,38 @@ export const apiSlice = createApi({
       query: () => '/auth/me',
       providesTags: ['User'],
     }),
-    getGithubAuthUrl: builder.query<{ url: string }, void>({
-      query: () => '/auth/github',
+    getGithubAuthUrl: builder.query<{ url: string }, { mobile?: boolean } | void>({
+      query: (args) => ({
+        url: '/auth/github/url',
+        params: args?.mobile ? { mobile: 'true' } : undefined,
+        responseHandler: (response) => response.text(),
+      }),
+      transformResponse: (response: string) => ({ url: response }),
     }),
+    validateGithub: builder.mutation<{ success: boolean }, { code: string }>({
+      query: ({ code }) => ({
+        url: '/auth/github/validate',
+        method: 'POST',
+        body: { code },
+      }),
+    }),
+    getMicrosoftAuthUrl: builder.query<{ url: string }, { mobile?: boolean } | void>({
+      query: (args) => ({
+        url: '/auth/microsoft/url',
+        params: args?.mobile ? { mobile: 'true' } : undefined,
+        responseHandler: (response) => response.text(),
+      }),
+      transformResponse: (response: string) => ({ url: response }),
+    }),
+    validateMicrosoft: builder.mutation<{ success: boolean }, { code: string }>(
+      {
+        query: ({ code }) => ({
+          url: '/auth/microsoft/validate',
+          method: 'POST',
+          body: { code },
+        }),
+      }
+    ),
     listRepositories: builder.query<Repository[], void>({
       query: () => '/github/repositories',
       providesTags: ['Repos'],
@@ -81,6 +111,29 @@ export const apiSlice = createApi({
         { type: 'Webhooks', id: dto.repo },
       ],
     }),
+    listMicrosoftWebhooks: builder.query<MicrosoftSubscription[], void>({
+      query: () => '/microsoft/webhooks',
+      providesTags: ['MicrosoftSubscriptions'],
+      refetchOnMountOrArgChange: true,
+    }),
+    createMicrosoftSubscription: builder.mutation<
+      MicrosoftSubscription,
+      { resource: string; changeType: string }
+    >({
+      query: (dto) => ({
+        url: '/microsoft/create-webhook',
+        method: 'POST',
+        body: dto,
+      }),
+      invalidatesTags: ['MicrosoftSubscriptions'],
+    }),
+    deleteMicrosoftSubscription: builder.mutation<void, { id: string }>({
+      query: ({ id }) => ({
+        url: `/microsoft/webhook?id=${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['MicrosoftSubscriptions'],
+    }),
   }),
 });
 
@@ -89,7 +142,15 @@ export const {
   useRegisterMutation,
   useGetProfileQuery,
   useGetGithubAuthUrlQuery,
+  useLazyGetGithubAuthUrlQuery,
+  useValidateGithubMutation,
+  useGetMicrosoftAuthUrlQuery,
+  useLazyGetMicrosoftAuthUrlQuery,
+  useValidateMicrosoftMutation,
   useListRepositoriesQuery,
   useListWebhooksQuery,
   useCreateWebhookMutation,
+  useListMicrosoftWebhooksQuery,
+  useCreateMicrosoftSubscriptionMutation,
+  useDeleteMicrosoftSubscriptionMutation,
 } = apiSlice;

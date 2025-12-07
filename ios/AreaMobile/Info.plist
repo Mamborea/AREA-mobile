@@ -50,5 +50,15 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<!-- Deep link URL scheme for OAuth callbacks -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>area</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
