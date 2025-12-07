@@ -94,20 +94,10 @@ function AppNavigator() {
 }
 
 function App() {
-  const linking = {
-    prefixes: ['area://'],
-    config: {
-      screens: {
-        // OAuth callbacks are handled by the useEffect listener in AppNavigator
-        // No screen routing needed here
-      },
-    },
-  };
-
   return (
     <Provider store={store}>
       <SafeAreaProvider>
-        <NavigationContainer linking={linking}>
+        <NavigationContainer>
           <AppNavigator />
         </NavigationContainer>
       </SafeAreaProvider>
