@@ -97,14 +97,11 @@ const authSlice = createSlice({
           state.isAuthenticated = !!action.payload;
         }
       )
-      .addMatcher(
-        isAnyOf(persistToken.rejected),
-        (state, action) => {
-          const token = action.meta.arg as string;
-          state.token = token;
-          state.isAuthenticated = !!token;
-        }
-      );
+      .addMatcher(isAnyOf(persistToken.rejected), (state, action) => {
+        const token = action.meta.arg as string;
+        state.token = token;
+        state.isAuthenticated = !!token;
+      });
   },
 });
 
