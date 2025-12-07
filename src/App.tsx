@@ -3,10 +3,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useEffect } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Linking,
   StyleSheet,
   View,
-  Alert,
 } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
@@ -43,7 +43,7 @@ function AppNavigator() {
           await validateMicrosoft({ code }).unwrap();
           Alert.alert('Success', 'Microsoft account linked successfully!');
         }
-      } catch (error) {
+      } catch (_error) {
         Alert.alert('Error', 'Failed to link account. Please try again.');
       }
     };

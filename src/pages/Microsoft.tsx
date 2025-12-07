@@ -1,19 +1,19 @@
+import { Picker } from '@react-native-picker/picker';
 import { useState } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
   ActivityIndicator,
   Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import {
   useCreateMicrosoftSubscriptionMutation,
   useDeleteMicrosoftSubscriptionMutation,
   useListMicrosoftWebhooksQuery,
 } from '../shared/src/native';
-import { Picker } from '@react-native-picker/picker';
 
 function CreateSubscriptionForm({ onClose }: { onClose: () => void }) {
   const [resource, setResource] = useState('me/mailFolders/inbox/messages');
@@ -26,7 +26,7 @@ function CreateSubscriptionForm({ onClose }: { onClose: () => void }) {
       await createSubscription({ resource, changeType }).unwrap();
       Alert.alert('Success', 'Subscription created successfully!');
       onClose();
-    } catch (err) {
+    } catch (_err) {
       Alert.alert('Error', 'Failed to create subscription.');
     }
   };
@@ -98,7 +98,7 @@ export function Microsoft() {
           onPress: async () => {
             try {
               await deleteSubscription({ id }).unwrap();
-            } catch (err) {
+            } catch (_err) {
               Alert.alert('Error', 'Failed to delete subscription.');
             }
           },
@@ -150,18 +150,54 @@ export function Microsoft() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#1a1a2e', padding: 10 },
-  form: { backgroundColor: '#16213e', padding: 15, borderRadius: 8, marginBottom: 20 },
-  formTitle: { fontSize: 18, color: '#fff', fontWeight: 'bold', marginBottom: 10 },
+  form: {
+    backgroundColor: '#16213e',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  formTitle: {
+    fontSize: 18,
+    color: '#fff',
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
   label: { color: '#fff', marginTop: 10 },
   picker: { backgroundColor: '#0f3460', color: '#fff', borderRadius: 8 },
-  formActions: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 20 },
-  button: { backgroundColor: '#e94560', padding: 15, borderRadius: 8, alignItems: 'center', marginVertical: 10 },
+  formActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 20,
+  },
+  button: {
+    backgroundColor: '#e94560',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginVertical: 10,
+  },
   buttonText: { color: '#fff', fontWeight: 'bold' },
-  cancelButton: { backgroundColor: '#888', padding: 15, borderRadius: 8, alignItems: 'center' },
+  cancelButton: {
+    backgroundColor: '#888',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
   cancelButtonText: { color: '#fff', fontWeight: 'bold' },
   errorText: { color: 'red', textAlign: 'center', margin: 10 },
-  card: { backgroundColor: '#16213e', padding: 15, borderRadius: 8, marginBottom: 10 },
+  card: {
+    backgroundColor: '#16213e',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
   cardText: { color: '#fff', marginBottom: 5 },
-  deleteButton: { backgroundColor: '#dc3545', padding: 10, borderRadius: 8, alignItems: 'center', marginTop: 10 },
+  deleteButton: {
+    backgroundColor: '#dc3545',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+  },
   deleteButtonText: { color: '#fff', fontWeight: 'bold' },
 });

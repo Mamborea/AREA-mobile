@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Alert,
   Linking,
   ScrollView,
@@ -6,7 +7,6 @@ import {
   Text,
   TouchableOpacity,
   View,
-  ActivityIndicator,
 } from 'react-native';
 import {
   useAppSelector,
