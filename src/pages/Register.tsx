@@ -74,6 +74,24 @@ export function Register() {
     0
   );
 
+  const getStrengthText = (strength: number) => {
+    if (strength === 0) return 'No password';
+    if (strength <= 2) return 'Weak';
+    if (strength <= 3) return 'Fair';
+    if (strength <= 4) return 'Good';
+    if (strength <= 5) return 'Strong';
+    return 'Very Strong';
+  };
+
+  const getStrengthColor = (strength: number) => {
+    if (strength === 0) return '#666';
+    if (strength <= 2) return '#ff4444';
+    if (strength <= 3) return '#ff9800';
+    if (strength <= 4) return '#ffd700';
+    if (strength <= 5) return '#4caf50';
+    return '#00c853';
+  };
+
   const isEmailValid = (value: string) =>
     value.length <= 254 &&
     /^[a-zA-Z0-9._%+-]+@([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+[a-zA-Z]{2,63}$/.test(
@@ -123,7 +141,7 @@ export function Register() {
     dispatch(logout());
     navigation.reset({
       index: 0,
-      routes: [{ name: 'Login' }],
+      routes: [{ name: 'Register' }],
     });
   };
 
@@ -209,17 +227,78 @@ export function Register() {
               </TouchableOpacity>
             </View>
 
-            <View style={{ marginTop: 8 }}>
+            <View style={{ marginTop: 12 }}>
+              {/* Password Strength Bar */}
+              {password ? (
+                <View style={{ marginBottom: 12 }}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      marginBottom: 6,
+                    }}
+                  >
+                    <Text style={{ color: '#888', fontSize: 12 }}>
+                      Password Strength:
+                    </Text>
+                    <Text
+                      style={{
+                        color: getStrengthColor(passwordStrength),
+                        fontSize: 12,
+                        fontWeight: '600',
+                      }}
+                    >
+                      {getStrengthText(passwordStrength)}
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      height: 6,
+                      backgroundColor: '#333',
+                      borderRadius: 3,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <View
+                      style={{
+                        height: '100%',
+                        width: `${(passwordStrength / 6) * 100}%`,
+                        backgroundColor: getStrengthColor(passwordStrength),
+                        borderRadius: 3,
+                      }}
+                    />
+                  </View>
+                </View>
+              ) : null}
+
+              {/* Requirements */}
+              <Text style={{ color: '#888', fontSize: 12, marginBottom: 6 }}>
+                Password requirements:
+              </Text>
               {requirements.map((req) => (
-                <Text
+                <View
                   key={req.label}
                   style={{
-                    color: req.test(password) ? 'green' : 'red',
-                    fontSize: 12,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginBottom: 4,
                   }}
                 >
-                  {req.label}
-                </Text>
+                  <Icon
+                    name={req.test(password) ? 'check-circle' : 'times-circle'}
+                    size={12}
+                    color={req.test(password) ? '#4caf50' : '#ff4444'}
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text
+                    style={{
+                      color: req.test(password) ? '#4caf50' : '#ff4444',
+                      fontSize: 11,
+                    }}
+                  >
+                    {req.label}
+                  </Text>
+                </View>
               ))}
             </View>
           </View>
@@ -249,7 +328,6 @@ export function Register() {
             </View>
           </View>
 
-          {/* Submit */}
           <TouchableOpacity
             style={[styles.button, isLoading && styles.buttonDisabled]}
             onPress={handleSubmit}
