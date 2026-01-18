@@ -10,9 +10,13 @@ describe('Helper Functions', () => {
       }
       return 'An unexpected error occurred.';
     };
-    
-    expect(formatErrorMessage({ data: { message: 'Custom error' } })).toBe('Custom error');
-    expect(formatErrorMessage({ message: 'Simple error' })).toBe('Simple error');
+
+    expect(formatErrorMessage({ data: { message: 'Custom error' } })).toBe(
+      'Custom error'
+    );
+    expect(formatErrorMessage({ message: 'Simple error' })).toBe(
+      'Simple error'
+    );
     expect(formatErrorMessage({})).toBe('An unexpected error occurred.');
     expect(formatErrorMessage(null)).toBe('An unexpected error occurred.');
   });
@@ -22,15 +26,17 @@ describe('Helper Functions', () => {
       if (text.length <= maxLength) return text;
       return text.slice(0, maxLength) + '...';
     };
-    
+
     expect(truncate('Short text', 20)).toBe('Short text');
-    expect(truncate('This is a very long text that needs truncation', 20)).toBe('This is a very long ...');
+    expect(truncate('This is a very long text that needs truncation', 20)).toBe(
+      'This is a very long ...'
+    );
     expect(truncate('Exact', 5)).toBe('Exact');
   });
 
   it('should debounce function calls', () => {
     jest.useFakeTimers();
-    
+
     const mockFn = jest.fn();
     const debounce = (fn: Function, delay: number) => {
       let timeoutId: NodeJS.Timeout;
@@ -39,19 +45,19 @@ describe('Helper Functions', () => {
         timeoutId = setTimeout(() => fn(...args), delay);
       };
     };
-    
+
     const debouncedFn = debounce(mockFn, 300);
-    
+
     debouncedFn();
     debouncedFn();
     debouncedFn();
-    
+
     expect(mockFn).not.toHaveBeenCalled();
-    
+
     jest.advanceTimersByTime(300);
-    
+
     expect(mockFn).toHaveBeenCalledTimes(1);
-    
+
     jest.useRealTimers();
   });
 
@@ -59,12 +65,12 @@ describe('Helper Functions', () => {
     const deepClone = <T>(obj: T): T => {
       return JSON.parse(JSON.stringify(obj));
     };
-    
+
     const original = { name: 'John', details: { age: 30 } };
     const cloned = deepClone(original);
-    
+
     cloned.details.age = 40;
-    
+
     expect(original.details.age).toBe(30);
     expect(cloned.details.age).toBe(40);
   });
@@ -73,7 +79,7 @@ describe('Helper Functions', () => {
     const isArrayNotEmpty = <T>(arr: T[]): boolean => {
       return Array.isArray(arr) && arr.length > 0;
     };
-    
+
     expect(isArrayNotEmpty([1, 2, 3])).toBe(true);
     expect(isArrayNotEmpty([])).toBe(false);
     expect(isArrayNotEmpty(['item'])).toBe(true);
@@ -83,7 +89,7 @@ describe('Helper Functions', () => {
     const getNestedProperty = (obj: any, path: string) => {
       return path.split('.').reduce((current, key) => current?.[key], obj);
     };
-    
+
     const data = {
       user: {
         profile: {
@@ -91,7 +97,7 @@ describe('Helper Functions', () => {
         },
       },
     };
-    
+
     expect(getNestedProperty(data, 'user.profile.name')).toBe('John');
     expect(getNestedProperty(data, 'user.profile.age')).toBeUndefined();
     expect(getNestedProperty(data, 'invalid.path')).toBeUndefined();

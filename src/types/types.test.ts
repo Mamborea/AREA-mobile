@@ -8,9 +8,15 @@ describe('Type Definitions', () => {
       Profile: undefined;
       Area: undefined;
     };
-    
-    const routes: (keyof RootStackParamList)[] = ['Login', 'Register', 'Dashboard', 'Profile', 'Area'];
-    
+
+    const routes: (keyof RootStackParamList)[] = [
+      'Login',
+      'Register',
+      'Dashboard',
+      'Profile',
+      'Area',
+    ];
+
     expect(routes).toHaveLength(5);
     expect(routes).toContain('Login');
     expect(routes).toContain('Dashboard');
@@ -22,13 +28,13 @@ describe('Type Definitions', () => {
       name: string;
       email: string;
     }
-    
+
     const mockUser: User = {
       id: 1,
       name: 'John Doe',
       email: 'john@example.com',
     };
-    
+
     expect(mockUser.id).toBeDefined();
     expect(mockUser.name).toBeDefined();
     expect(mockUser.email).toBeDefined();
@@ -42,19 +48,19 @@ describe('Type Definitions', () => {
       token: string | null;
       isAuthenticated: boolean;
     }
-    
+
     const authenticatedState: AuthState = {
       user: { name: 'John', email: 'john@example.com' },
       token: 'abc123',
       isAuthenticated: true,
     };
-    
+
     const unauthenticatedState: AuthState = {
       user: null,
       token: null,
       isAuthenticated: false,
     };
-    
+
     expect(authenticatedState.isAuthenticated).toBe(true);
     expect(unauthenticatedState.isAuthenticated).toBe(false);
     expect(authenticatedState.user).not.toBeNull();

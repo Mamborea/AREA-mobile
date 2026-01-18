@@ -8,8 +8,8 @@ describe('App Configuration', () => {
       services: '/services',
       googleAuth: '/auth/google',
     };
-    
-    Object.values(apiEndpoints).forEach(endpoint => {
+
+    Object.values(apiEndpoints).forEach((endpoint) => {
       expect(endpoint).toMatch(/^\//);
       expect(endpoint.length).toBeGreaterThan(1);
     });
@@ -21,7 +21,7 @@ describe('App Configuration', () => {
       frontBaseUrl: 'https://front.mambokara.dev',
       isDevelopment: false,
     };
-    
+
     expect(envConfig.apiBaseUrl).toContain('https://');
     expect(envConfig.frontBaseUrl).toContain('https://');
     expect(typeof envConfig.isDevelopment).toBe('boolean');
@@ -33,10 +33,10 @@ describe('App Configuration', () => {
       { name: 'gmail', authUrl: '/auth/gmail' },
       { name: 'discord', authUrl: '/auth/discord' },
     ];
-    
+
     expect(services.length).toBeGreaterThan(0);
-    
-    services.forEach(service => {
+
+    services.forEach((service) => {
       expect(service.name).toBeTruthy();
       expect(service.authUrl).toMatch(/^\/auth\//);
     });
@@ -50,7 +50,7 @@ describe('App Configuration', () => {
         animation: 'default',
       },
     };
-    
+
     expect(navigationConfig.initialRouteName).toBe('Login');
     expect(navigationConfig.screenOptions.headerShown).toBeDefined();
   });

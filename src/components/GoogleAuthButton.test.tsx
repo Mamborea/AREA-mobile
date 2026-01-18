@@ -93,10 +93,10 @@ describe('GoogleAuthButton', () => {
     const onError = jest.fn();
     const { UNSAFE_getByType } = render(<GoogleAuthButton onError={onError} />);
     const button = UNSAFE_getByType(require('react-native').TouchableOpacity);
-    
+
     fireEvent.press(button);
-    
-    // Call should happen synchronously  
+
+    // Call should happen synchronously
     expect(onError).toHaveBeenCalledWith(
       'Failed to initiate Google authentication.'
     );

@@ -1,5 +1,3 @@
-import { Text, TextInput, TouchableOpacity } from 'react-native';
-
 // Tests pour la logique de Login sans Redux
 describe('Login Page Logic', () => {
   it('should validate email format', () => {
@@ -8,21 +6,21 @@ describe('Login Page Logic', () => {
       'user.name@domain.co.uk',
       'first+last@company.com',
     ];
-    
+
     const invalidEmails = [
       'notanemail',
       '@example.com',
       'test@',
       'test @example.com',
     ];
-    
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
-    validEmails.forEach(email => {
+
+    validEmails.forEach((email) => {
       expect(emailRegex.test(email)).toBe(true);
     });
-    
-    invalidEmails.forEach(email => {
+
+    invalidEmails.forEach((email) => {
       expect(emailRegex.test(email)).toBe(false);
     });
   });
@@ -31,7 +29,7 @@ describe('Login Page Logic', () => {
     const isFormValid = (email: string, password: string) => {
       return email.length > 0 && password.length > 0;
     };
-    
+
     expect(isFormValid('', '')).toBe(false);
     expect(isFormValid('test@example.com', '')).toBe(false);
     expect(isFormValid('', 'password')).toBe(false);
@@ -44,20 +42,17 @@ describe('Login Page Logic', () => {
       'http://localhost:3000',
       'https://api.subdomain.domain.com',
     ];
-    
-    const invalidUrls = [
-      'not-a-url',
-      'ftp://example.com',
-      'example.com',
-    ];
-    
-    const isValidUrl = (url: string) => url.startsWith('http://') || url.startsWith('https://');
-    
-    validUrls.forEach(url => {
+
+    const invalidUrls = ['not-a-url', 'ftp://example.com', 'example.com'];
+
+    const isValidUrl = (url: string) =>
+      url.startsWith('http://') || url.startsWith('https://');
+
+    validUrls.forEach((url) => {
       expect(isValidUrl(url)).toBe(true);
     });
-    
-    invalidUrls.forEach(url => {
+
+    invalidUrls.forEach((url) => {
       expect(isValidUrl(url)).toBe(false);
     });
   });
@@ -68,7 +63,7 @@ describe('Login Page Logic', () => {
       networkError: 'Network error occurred',
       emptyFields: 'Please fill all fields',
     };
-    
+
     expect(errorMessages.invalidCredentials).toBeTruthy();
     expect(errorMessages.networkError).toBeTruthy();
     expect(typeof errorMessages.emptyFields).toBe('string');
