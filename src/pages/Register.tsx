@@ -1,11 +1,10 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Text,
   TextInput,
@@ -13,9 +12,17 @@ import {
   View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
+import { useDispatch } from 'react-redux';
 import { GoogleAuthButton } from '../components/GoogleAuthButton';
 import type { RootStackParamList } from '../navigation';
-import { useRegisterMutation } from '../shared/src/native';
+import { setBaseUrl } from '../shared/src/features/configSlice';
+import {
+  apiSlice,
+  clearToken,
+  logout,
+  useAppSelector,
+  useRegisterMutation,
+} from '../shared/src/native';
 import styles from '../style/index';
 
 type RegisterNavigationProp = NativeStackNavigationProp<
@@ -34,6 +41,11 @@ export function Register() {
 
   const navigation = useNavigation<RegisterNavigationProp>();
   const [register, { isLoading }] = useRegisterMutation();
+
+  const dispatch = useDispatch();
+  const baseUrlFromStore = useAppSelector((state) => state.config.baseUrl);
+
+  const [customBaseUrl, setCustomBaseUrl] = useState(baseUrlFromStore);
 
   // Password requirements
   const requirements = [
@@ -105,21 +117,48 @@ export function Register() {
     }
   };
 
-  return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.card}>
-          <Text style={styles.title}>Register</Text>
+  const handleLogout = async () => {
+    await dispatch(clearToken());
+    dispatch(apiSlice.util.resetApiState());
+    dispatch(logout());
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Login' }],
+    });
+  };
 
+  const updateBaseUrl = async () => {
+    if (!customBaseUrl.startsWith('http')) {
+      Alert.alert('Error', 'URL must begin with http or https');
+      return;
+    }
+
+    dispatch(setBaseUrl(customBaseUrl));
+    await AsyncStorage.setItem('baseUrl', customBaseUrl);
+    Alert.alert('Success', 'Base URL updated !');
+    handleLogout();
+  };
+
+  return (
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <View style={styles.cardsContainer}>
+        <View style={styles.card}>
+          <View style={styles.infoSection}>
+            <Text style={styles.title}>Register</Text>
+            <Text style={styles.cardDescription}>
+              Please connect you with your email or Google account. You can
+              change the server you want to connect you just below.
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.card}>
           {errorMessage ? (
             <Text style={styles.errorText}>{errorMessage}</Text>
           ) : null}
 
           {/* Name */}
-          <View style={styles.formGroup}>
+          <View style={styles.infoSection}>
             <Text style={styles.label}>Name</Text>
             <TextInput
               style={styles.input}
@@ -132,7 +171,7 @@ export function Register() {
           </View>
 
           {/* Email */}
-          <View style={styles.formGroup}>
+          <View style={styles.infoSection}>
             <Text style={styles.label}>Email</Text>
             <TextInput
               style={styles.input}
@@ -147,7 +186,7 @@ export function Register() {
           </View>
 
           {/* Password */}
-          <View style={styles.formGroup}>
+          <View style={styles.infoSection}>
             <Text style={styles.label}>Password</Text>
             <View style={{ position: 'relative' }}>
               <TextInput
@@ -186,7 +225,7 @@ export function Register() {
           </View>
 
           {/* Confirm Password */}
-          <View style={styles.formGroup}>
+          <View style={styles.infoSection}>
             <Text style={styles.label}>Confirm Password</Text>
             <View style={{ position: 'relative' }}>
               <TextInput
@@ -224,7 +263,7 @@ export function Register() {
           </TouchableOpacity>
 
           <View style={styles.linkContainer}>
-            <Text style={styles.linkText}>Already have an account? </Text>
+            <Text style={styles.link}>Already have an account? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
               <Text style={styles.link}>Login</Text>
             </TouchableOpacity>
@@ -238,7 +277,25 @@ export function Register() {
 
           <GoogleAuthButton onError={setErrorMessage} mobile='true' />
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>API Base URL</Text>
+          <Text style={styles.cardDescription}>
+            Change the server where you to want to connect you. Write the API
+            URL
+          </Text>
+          <TextInput
+            style={styles.input}
+            value={customBaseUrl}
+            onChangeText={setCustomBaseUrl}
+            placeholder={customBaseUrl}
+            placeholderTextColor='#888'
+          />
+          <TouchableOpacity style={styles.button} onPress={updateBaseUrl}>
+            <Text style={styles.buttonText}>Update Base URL</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
